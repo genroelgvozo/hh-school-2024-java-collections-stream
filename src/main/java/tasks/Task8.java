@@ -6,6 +6,7 @@ import common.PersonWithResumes;
 import common.Resume;
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /*
   Еще один вариант задачи обогащения
@@ -21,7 +22,18 @@ public class Task8 {
   }
 
   public Set<PersonWithResumes> enrichPersonsWithResumes(Collection<Person> persons) {
-    Set<Resume> resumes = personService.findResumes(Set.of());
-    return Set.of();
+    Set<Integer> personIds = persons.stream()
+        .map(Person::id)
+        .collect(Collectors.toSet());
+
+    Set<Resume> resumes = personService.findResumes(personIds);
+    return persons.stream()
+        .map(person -> {
+          Set<Resume> personResumes = resumes.stream()
+              .filter(resume -> resume.personId().equals(person.id()))
+              .collect(Collectors.toSet());
+          return  new PersonWithResumes(person, personResumes);
+        })
+        .collect(Collectors.toSet());
   }
 }
