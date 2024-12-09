@@ -26,21 +26,37 @@ public class Task9 {
   // Костыль, эластик всегда выдает в топе "фальшивую персону".
   // Конвертируем начиная со второй
   public List<String> getNames(List<Person> persons) {
-    if (persons.size() == 0) {
+    if (persons.isEmpty()) {     //  тут поправку на спец метод проверки на пустоту даже сама идея предлагает. на мой взгляд проще прочитать слова чем думать почему тут равно-равно стоит
       return Collections.emptyList();
     }
-    persons.remove(0);
-    return persons.stream().map(Person::firstName).collect(Collectors.toList());
+    // persons.remove(0); это можно просто в стрим сразу включить написав skip
+    return persons.stream().skip(1)
+        .map(Person::firstName)          // ну и в целом легче читать если главные пункты
+        .collect(Collectors.toList());   // на разных строчкках, но наверно это не очень важно
+
   }
 
   // Зачем-то нужны различные имена этих же персон (без учета фальшивой разумеется)
+  /*
+  тут идея сама пишет, что distinct не нужен:
+  Redundant 'distinct()' call: elements will be distinct anyway when collected to a Set
+  что логично, действительно, зачем еще дистинкт когда мы все равно потом все запишем в множество
+  а без него все в целом упрощается до конструктора нового сета просто
+ */
+
   public Set<String> getDifferentNames(List<Person> persons) {
-    return getNames(persons).stream().distinct().collect(Collectors.toSet());
+    return new HashSet<>(getNames(persons));
   }
 
   // Тут фронтовая логика, делаем за них работу - склеиваем ФИО
-  public String convertPersonToString(Person person) {
-    String result = "";
+  /* в целом тут просто ошиблись и вместо фио спросили дважды фамилия и ни разу отчество,
+     но если честно, я не вижу смысла проверять что фамилия и имя присутсвуют, потому что
+     обычно это обязательные поля и пропустить можно только отчество по причине отсутвия его во многих странах
+     но оставлю, мало ли в самом коде забыли сделать эти поля обязательными...
+     также можно использовать StringBuilder но так как тут всего 3 слова, наверно не имеет смысла
+   */
+  public String convertPersonToString(Person person) { // не надо людей превращать в строчки. страшна :)
+    String result = "";                                // но назание понятное, менять не вижу смысла
     if (person.secondName() != null) {
       result += person.secondName();
     }
@@ -49,41 +65,31 @@ public class Task9 {
       result += " " + person.firstName();
     }
 
-    if (person.secondName() != null) {
+    if (person.middleName() != null) {
       result += " " + person.secondName();
     }
     return result;
   }
 
   // словарь id персоны -> ее имя
+  // перепишем через стрим для большей наглядности
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-    Map<Integer, String> map = new HashMap<>(1);
-    for (Person person : persons) {
-      if (!map.containsKey(person.id())) {
-        map.put(person.id(), convertPersonToString(person));
-      }
-    }
-    return map;
+    return persons.stream()
+        .distinct()
+        .collect(Collectors.toMap(Person::id, this::convertPersonToString));
   }
 
   // есть ли совпадающие в двух коллекциях персоны?
+  //через стрим быстрее и нагляднее
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    boolean has = false;
-    for (Person person1 : persons1) {
-      for (Person person2 : persons2) {
-        if (person1.equals(person2)) {
-          has = true;
-        }
-      }
-    }
-    return has;
+    Set<Person> setForPerson2 = new HashSet<>(persons2);
+    return persons1.stream().anyMatch(setForPerson2::contains);
   }
 
   // Посчитать число четных чисел
+  // в целом не вижу смысла в доп переменной count, можно сразу
   public long countEven(Stream<Integer> numbers) {
-    count = 0;
-    numbers.filter(num -> num % 2 == 0).forEach(num -> count++);
-    return count;
+    return numbers.filter(num -> num % 2 == 0).count();
   }
 
   // Загадка - объясните почему assert тут всегда верен
@@ -95,4 +101,10 @@ public class Task9 {
     Set<Integer> set = new HashSet<>(integers);
     assert snapshot.toString().equals(set.toString());
   }
+  /*
+    HashSet хранит только уникальные элементы, а так как изначально в списке не было дубликатов, то множество содержит все числа от 1 до 10,000.
+    toString() на HashSet не сохраняет порядок добавления элементов. Вместо этого возвращается строковое представление, которое соответствует элементам,
+    упорядоченным по порядку возрастания. Строка, возвращаемая snapshot.toString(), будет содержать числа в порядке их появления, но так как  числа в нем те же,
+    что и в set, а все они уникальны и в одном и том же диапазоне, то итоговые строки окажутся одинаковыми по содержимому, что делает assert всегда верным.
+*/
 }
