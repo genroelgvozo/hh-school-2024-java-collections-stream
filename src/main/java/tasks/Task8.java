@@ -5,7 +5,12 @@ import common.PersonService;
 import common.PersonWithResumes;
 import common.Resume;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /*
   Еще один вариант задачи обогащения
@@ -14,6 +19,7 @@ import java.util.Set;
   На выходе хотим получить объекты с персоной и ее списком резюме
  */
 public class Task8 {
+
   private final PersonService personService;
 
   public Task8(PersonService personService) {
@@ -21,7 +27,26 @@ public class Task8 {
   }
 
   public Set<PersonWithResumes> enrichPersonsWithResumes(Collection<Person> persons) {
-    Set<Resume> resumes = personService.findResumes(Set.of());
-    return Set.of();
+
+    Set<Integer> personIds = persons
+        .stream()
+        .map(Person::id)
+        .collect(Collectors.toSet());
+
+    Map<Integer, List<Resume>> personResumes = personService
+        .findResumes(personIds)
+        .stream()
+        .collect(
+            Collectors.groupingBy(Resume::personId)
+        );
+
+    return persons.stream()
+        .map(person ->
+            new PersonWithResumes(
+                person,
+                new HashSet<>(personResumes.getOrDefault(person.id(), Collections.emptyList()))
+            )
+        )
+        .collect(Collectors.toSet());
   }
 }

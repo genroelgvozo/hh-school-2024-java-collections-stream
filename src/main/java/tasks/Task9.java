@@ -4,7 +4,6 @@ import common.Person;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,68 +25,106 @@ public class Task9 {
   // Костыль, эластик всегда выдает в топе "фальшивую персону".
   // Конвертируем начиная со второй
   public List<String> getNames(List<Person> persons) {
-    if (persons.size() == 0) {
-      return Collections.emptyList();
-    }
-    persons.remove(0);
-    return persons.stream().map(Person::firstName).collect(Collectors.toList());
+
+    /*
+     1) В Stream Api есть метод skip который позволяет сразу пропустить элементы коллекции
+     2) Можно обернуть в тернарный оператор для упрощения конструкции
+     */
+
+    return persons.isEmpty() ? Collections.emptyList() :
+        persons
+            .stream()
+            .skip(1)
+            .map(Person::firstName)
+            .collect(Collectors.toList());
   }
 
   // Зачем-то нужны различные имена этих же персон (без учета фальшивой разумеется)
   public Set<String> getDifferentNames(List<Person> persons) {
-    return getNames(persons).stream().distinct().collect(Collectors.toSet());
+
+    /*
+    1) Два раза находили уникальные элементы коллекции, с помощью distinct() и toSet()
+    2) toSet() можно сократить, обернув List в new HashSet<>(list)
+     */
+
+    return new HashSet<>(this.getNames(persons));
   }
 
   // Тут фронтовая логика, делаем за них работу - склеиваем ФИО
   public String convertPersonToString(Person person) {
-    String result = "";
+
+    /*
+    1) Можно упростить заиспользовав StringBuilder,
+    это позволит не создавать новые строки в памяти при конкатенации
+    2) в методе 2 использовался person.secondName() -> заменил на person.middleName()
+     */
+    StringBuilder result = new StringBuilder();
+
     if (person.secondName() != null) {
-      result += person.secondName();
+      result.append(person.secondName());
     }
 
     if (person.firstName() != null) {
-      result += " " + person.firstName();
+      if (!result.isEmpty()) {
+        result.append(" ");
+      }
+      result.append(person.firstName());
     }
 
-    if (person.secondName() != null) {
-      result += " " + person.secondName();
+    if (person.middleName() != null) {
+      if (!result.isEmpty()) {
+        result.append(" ");
+      }
+      result.append(person.middleName());
     }
-    return result;
+
+    return result.toString();
   }
 
   // словарь id персоны -> ее имя
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-    Map<Integer, String> map = new HashMap<>(1);
-    for (Person person : persons) {
-      if (!map.containsKey(person.id())) {
-        map.put(person.id(), convertPersonToString(person));
-      }
-    }
-    return map;
+    /*
+    1) Зачем то создавали отдельную мапу и выполняли полной перебор персон
+    2) Каждую персону проверяли еще и на условие
+     */
+    return persons.stream()
+        .collect(
+            Collectors.toMap(
+                Person::id,
+                this::convertPersonToString,
+                (p, w) -> p
+        ));
   }
 
   // есть ли совпадающие в двух коллекциях персоны?
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    boolean has = false;
-    for (Person person1 : persons1) {
-      for (Person person2 : persons2) {
-        if (person1.equals(person2)) {
-          has = true;
-        }
+    /*
+    1) Преобразуем одну коллекцию в Set для ускорения проверки на совпадение
+    2) В исходном коде было O(x*y)
+     */
+    Set<Person> set = new HashSet<>(persons1);
+    for (Person person : persons2) {
+      if (set.contains(person)) {
+        return true;
       }
     }
-    return has;
+    return false;
   }
 
   // Посчитать число четных чисел
   public long countEven(Stream<Integer> numbers) {
-    count = 0;
-    numbers.filter(num -> num % 2 == 0).forEach(num -> count++);
-    return count;
+    /*
+    Используем метод count() - возвращает количество элементов в потоке после применения фильтра.
+     */
+    return numbers.filter(num -> num % 2 == 0).count();
   }
 
   // Загадка - объясните почему assert тут всегда верен
   // Пояснение в чем соль - мы перетасовали числа, обернули в HashSet, а toString() у него вернул их в сортированном порядке
+  /*
+  1) Повезло, HashSet не гарантирует порядок и может не совпадать с порядком в листе snapshot
+  2) Как то переопределили реализацию Set
+   */
   void listVsSet() {
     List<Integer> integers = IntStream.rangeClosed(1, 10000).boxed().collect(Collectors.toList());
     List<Integer> snapshot = new ArrayList<>(integers);
