@@ -23,6 +23,8 @@ public class Task1 {
 
   public List<Person> findOrderedPersons(List<Integer> personIds) {
     Set<Person> persons = personService.findPersons(personIds);
-    return Collections.emptyList();
+    return persons.stream()
+            .sorted((p1, p2) -> Integer.compare(personIds.indexOf(p1.id()), personIds.indexOf(p2.id())))
+            .toList();
   }
 }
