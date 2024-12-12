@@ -2,8 +2,10 @@ package tasks;
 
 import common.Person;
 import common.PersonService;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /*
@@ -23,6 +25,22 @@ public class Task1 {
 
   public List<Person> findOrderedPersons(List<Integer> personIds) {
     Set<Person> persons = personService.findPersons(personIds);
-    return Collections.emptyList();
+
+    // O(x)
+    Map<Integer, Person> personMapById = new HashMap<>();
+    for (Person person : persons) {
+      personMapById.put(person.id(), person);
+    }
+
+    // O(y)
+    List<Person> orderedPersons = new ArrayList<>();
+    for (Integer id : personIds) {
+      if (personMapById.containsKey(id)) {
+        orderedPersons.add(personMapById.get(id));
+      }
+    }
+
+    // O(x+y)
+    return orderedPersons;
   }
 }
