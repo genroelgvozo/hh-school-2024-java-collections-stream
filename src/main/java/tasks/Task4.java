@@ -23,7 +23,7 @@ public class Task4 {
   }
 
   public List<ApiPersonDto> convert(List<Person> persons) {
-    return persons.parallelStream()
+    return persons.parallelStream() // если список персон очень большой параллельный стрим может ускорить процесс конвертации, но можно, конечно обычным стримом
         .map(personConverter::convert)
         .collect(Collectors.toList());
   }

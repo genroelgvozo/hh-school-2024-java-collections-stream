@@ -28,15 +28,12 @@ public class Task1 {
   public List<Person> findOrderedPersons(List<Integer> personIds) {
     Set<Person> persons = personService.findPersons(personIds);
 
-    Map<Integer, Person> personAndTheirIdMap = persons.stream()
+    Map<Integer, Person> IdPersonMap = persons.stream()
             .collect(Collectors.toMap(Person::id, person -> person));
 
-    List<Person> listOfOrderedPersons = new ArrayList<>();
-    for (Integer id: personIds){
-      if(personAndTheirIdMap.containsKey(id)){
-        listOfOrderedPersons.add(personAndTheirIdMap.get(id));
-      }
-    }
-    return listOfOrderedPersons;
+    return personIds.stream()
+        .map(IdPersonMap::get)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
   }
 }

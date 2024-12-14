@@ -13,10 +13,10 @@ import java.util.List;
 public class Task3 {
 
   public static List<Person> sort(Collection<Person> persons) {
-    List<Person> sortedPerson = new ArrayList<>(persons);
-    sortedPerson.sort(Comparator.comparing(Person::secondName)
-        .thenComparing(Person::firstName)
-        .thenComparing(Person::createdAt));
-    return sortedPerson;
+    return persons.stream()
+        .sorted(Comparator.comparing(Person::secondName)
+            .thenComparing(Person::firstName)
+            .thenComparing(Person::createdAt))
+        .toList();
   }
 }
