@@ -22,7 +22,6 @@ public class Task4 {
   }
 
   public List<ApiPersonDto> convert(List<Person> persons) {
-
     return persons.stream().map(personConverter::convert).toList();
   }
 }

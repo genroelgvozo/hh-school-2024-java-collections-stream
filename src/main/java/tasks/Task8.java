@@ -20,11 +20,6 @@ import java.util.stream.Stream;
    Если для каждого personId существует ровно один Person, то можно предположить, что findPersons() вернет
    набор Set<Person> из ровно того же числа элементов, что и на входе. Но при этом не понятно, чего ожидать
    от findResumes(), если одному personId может соответствовать несколько резюме.
-
-   Так же не понятно, почему не сработала 3-я лямбда для Collectors.toMap:
-                (existing, replacement) -> {
-                existing.addAll(replacement);
-                return existing;}));
  */
 public class Task8 {
   private final PersonService personService;
@@ -52,7 +47,7 @@ public class Task8 {
       return persons.stream()
             .map(person -> new PersonWithResumes(
                     person,
-                    resumesMap.getOrDefault(person.id(), Set.of()))) // устранавливаю значение по умолчанию, чтобы возвращал пустой Set, а не Null
+                    resumesMap.getOrDefault(person.id(), Set.of())))
             .collect(Collectors.toSet());
   }
 }

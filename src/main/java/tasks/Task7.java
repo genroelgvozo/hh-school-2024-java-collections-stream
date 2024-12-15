@@ -15,9 +15,9 @@ public class Task7 {
 
   public static Set<String> vacancyNames(Collection<Company> companies) {
     return companies.stream()
-            .flatMap( // делаем вложенный поток по вакансиям компаний
-                    company -> company.getVacancies().stream()
-                            .map(Vacancy::getTitle)) // получаем названия вакансий в компании
-            .collect(Collectors.toSet()); // собираем в set
+            .flatMap(
+                company -> company.getVacancies().stream()
+                    .map(Vacancy::getTitle))
+            .collect(Collectors.toSet());
   }
 }

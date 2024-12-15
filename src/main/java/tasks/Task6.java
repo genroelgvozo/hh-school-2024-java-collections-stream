@@ -23,16 +23,17 @@ public class Task6 {
     Map<Integer, String> areasMap = areas.stream()
             .collect(
                     Collectors.toMap(
-                            Area::getId, // в качестве ключа - Id
-                            Area::getName // считаем, что элементы уникальны
+                            Area::getId,
+                            Area::getName
                     )
             );
 
     return persons.stream().
-            flatMap( // создаем потоки внутри потока (и преобразуем)
-                    person -> personAreaIds.get(person.id()) // получение areaIds для person
-                            .stream() // делаем stream для каждого элемента
-                            .map(areaId -> String.format("%s - %s", person.firstName(), areasMap.get(areaId)))) // формируем строку
-            .collect(Collectors.toSet()); // преобразуем в Set (HashSet)
+            flatMap(
+                    person -> personAreaIds.get(person.id())
+                            .stream()
+                            .map(areaId ->
+                                String.format("%s - %s", person.firstName(), areasMap.get(areaId))))
+            .collect(Collectors.toSet());
   }
 }
