@@ -55,13 +55,11 @@ public class Task9 {
 
   // словарь id персоны -> ее имя
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-    Map<Integer, String> map = new HashMap<>(1);
-    for (Person person : persons) {
-      if (!map.containsKey(person.id())) {
-        map.put(person.id(), convertPersonToString(person));
-      }
-    }
-    return map;
+    // Более чистый код
+    // Т.к. в изначальном коде есть проверка на повторение person.id
+    // то используем toMap с мерджем, т.к в противном случае дубликат заменит собой первый вариант
+    return persons.stream()
+        .collect(Collectors.toMap(Person::id, this::convertPersonToString, (a,b) -> a));
   }
 
   // есть ли совпадающие в двух коллекциях персоны?
