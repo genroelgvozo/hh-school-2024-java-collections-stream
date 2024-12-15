@@ -27,7 +27,7 @@ public class Task9 {
   // Костыль, эластик всегда выдает в топе "фальшивую персону".
   // Конвертируем начиная со второй
   public List<String> getNames(List<Person> persons) {
-    // Более чистый код
+    // Более наглядный код
     // Не тратим время на удаление нулевого элемента из Листа
     // List на входе может быть неизменяемым
     return persons.stream()
@@ -38,16 +38,15 @@ public class Task9 {
 
   // Зачем-то нужны различные имена этих же персон (без учета фальшивой разумеется)
   public Set<String> getDifferentNames(List<Person> persons) {
-    // Тут подсказывает IDEA
     // Set содержит уникальные элементы, distinct избыточен
-    // Заменяем на конструктор HashSet
+    // Заменяем stream на конструктор HashSet
     return new HashSet<>(getNames(persons));
   }
 
   // Тут фронтовая логика, делаем за них работу - склеиваем ФИО
   public String convertPersonToString(Person person) {
     // Опечатка, вместо middleName используется secondName
-    // Более чистый код
+    // Более наглядный код
     return Stream.of(person.secondName(), person.firstName(), person.middleName())
         .filter(Objects::nonNull)
         .collect(Collectors.joining(" "));
@@ -55,7 +54,7 @@ public class Task9 {
 
   // словарь id персоны -> ее имя
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-    // Более чистый код
+    // Более наглядный код
     // Т.к. в изначальном коде есть проверка на повторение person.id
     // то используем toMap с мерджем, т.к в противном случае дубликат заменит собой первый вариант
     return persons.stream()
@@ -64,7 +63,7 @@ public class Task9 {
 
   // есть ли совпадающие в двух коллекциях персоны?
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    // Более чистый код
+    // Более наглядный код
     return !Collections.disjoint(persons1, persons2);
   }
 
