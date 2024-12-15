@@ -24,7 +24,7 @@ public class Task1 {
   // Асимптотика работы - O(n)
   public List<Person> findOrderedPersons(List<Integer> personIds) {
     Map<Integer, Person> personsMap = personService.findPersons(personIds).stream()
-      .collect(Collectors.toMap(Person::id, x -> x));
+      .collect(Collectors.toMap(Person::id, person -> person));
 
     return personIds.stream()
       .map(personsMap::get)
