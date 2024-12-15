@@ -64,22 +64,16 @@ public class Task9 {
 
   // есть ли совпадающие в двух коллекциях персоны?
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    boolean has = false;
-    for (Person person1 : persons1) {
-      for (Person person2 : persons2) {
-        if (person1.equals(person2)) {
-          has = true;
-        }
-      }
-    }
-    return has;
+    // Более чистый код
+    return !Collections.disjoint(persons1, persons2);
   }
 
   // Посчитать число четных чисел
   public long countEven(Stream<Integer> numbers) {
-    count = 0;
-    numbers.filter(num -> num % 2 == 0).forEach(num -> count++);
-    return count;
+    // Переменная count не нужна
+    return numbers
+        .filter(number -> number % 2 == 0)
+        .count();
   }
 
   // Загадка - объясните почему assert тут всегда верен
