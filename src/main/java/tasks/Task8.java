@@ -34,12 +34,17 @@ public class Task8 {
   }
 
   public Set<PersonWithResumes> enrichPersonsWithResumes(Collection<Person> persons) {
-    Set<Resume> resumes = personService.findResumes(persons.stream().map(person -> person.id()).collect(Collectors.toSet()));
+    Set<Resume> resumes = personService.findResumes(
+        persons.stream()
+            .map(person -> person.id())
+            .collect(Collectors.toSet())
+    );
     Map<Integer, Set<Resume>> resumesMap;
 
     // Составляем HashMap из resumes. Так как они Set и каждый раз бегать по всему Set будет накладно.
-    resumesMap = resumes.stream().collect(Collectors.toMap(
-            resume -> resume.personId(),
+    resumesMap = resumes.stream()
+        .collect(Collectors.toMap(
+            Resume::personId,
             resume -> Set.of(resume),
             (existing, recent) -> Stream.concat(existing.stream(), recent.stream())
                     .collect(Collectors.toSet())));

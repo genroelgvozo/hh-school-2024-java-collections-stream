@@ -1,6 +1,8 @@
 package tasks;
 
 import common.Company;
+import common.Vacancy;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,8 +17,7 @@ public class Task7 {
     return companies.stream()
             .flatMap( // делаем вложенный поток по вакансиям компаний
                     company -> company.getVacancies().stream()
-                            .map(vacancy -> vacancy.getTitle())) // получаем названия вакансий в компании
+                            .map(Vacancy::getTitle)) // получаем названия вакансий в компании
             .collect(Collectors.toSet()); // собираем в set
   }
-
 }

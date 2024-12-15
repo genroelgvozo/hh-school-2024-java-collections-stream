@@ -10,6 +10,7 @@ import java.util.List;
 Задача 3
 Отсортировать коллекцию сначала по фамилии, по имени (при равной фамилии), и по дате создания (при равных фамилии и имени)
  */
+// Асимптотика O(n*log(n)) - просто сортировка
 public class Task3 {
 
   public static List<Person> sort(Collection<Person> persons) {
@@ -18,6 +19,5 @@ public class Task3 {
                               .thenComparing(Person::secondName)
                               .thenComparing(Person::createdAt))
             .toList();
-//    return new ArrayList<>(persons);
   }
 }

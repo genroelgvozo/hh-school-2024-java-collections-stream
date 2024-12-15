@@ -13,6 +13,8 @@ import java.util.Set;
 нужно их отсортировать в том же порядке, что и переданные id.
 Оценить асимптотику работы
  */
+
+// Асимптотика O(n2*log(n)): [O(n*log(n)) = sorted] * [O(n) = personIds]
 public class Task1 {
 
   private final PersonService personService;

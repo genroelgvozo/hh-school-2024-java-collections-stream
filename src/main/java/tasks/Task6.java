@@ -23,8 +23,8 @@ public class Task6 {
     Map<Integer, String> areasMap = areas.stream()
             .collect(
                     Collectors.toMap(
-                            s->s.getId(), // в качестве ключа - Id
-                            s->s.getName() // считаем, что элементы уникальны
+                            Area::getId, // в качестве ключа - Id
+                            Area::getName // считаем, что элементы уникальны
                     )
             );
 
