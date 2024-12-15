@@ -1,14 +1,8 @@
 package tasks;
 
 import common.Person;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -23,66 +17,45 @@ public class Task9 {
 
   private long count;
 
-  // Костыль, эластик всегда выдает в топе "фальшивую персону".
-  // Конвертируем начиная со второй
+
   public List<String> getNames(List<Person> persons) {
-    if (persons.size() == 0) {
+    if (persons.isEmpty()) { //метод isEmpty() чуть-чуть быстрее, чем size>0
       return Collections.emptyList();
     }
-    persons.remove(0);
-    return persons.stream().map(Person::firstName).collect(Collectors.toList());
+    return persons.stream()
+        .skip(1)                    //пропускаем первую позицию
+        .map(Person::firstName)
+        .collect(Collectors.toList());
   }
 
   // Зачем-то нужны различные имена этих же персон (без учета фальшивой разумеется)
   public Set<String> getDifferentNames(List<Person> persons) {
-    return getNames(persons).stream().distinct().collect(Collectors.toSet());
+    return new HashSet<>(getNames(persons)); //используем getNames и ложим в HashSet уникальных имен
   }
 
   // Тут фронтовая логика, делаем за них работу - склеиваем ФИО
   public String convertPersonToString(Person person) {
-    String result = "";
-    if (person.secondName() != null) {
-      result += person.secondName();
-    }
-
-    if (person.firstName() != null) {
-      result += " " + person.firstName();
-    }
-
-    if (person.secondName() != null) {
-      result += " " + person.secondName();
-    }
-    return result;
+    return Stream.of(person.firstName(),person.secondName(),person.middleName()) //сокращаем всю эту грамозткость до 1 StreamApi(кстати, в оригинале 2 раза secondName, ошибка???)
+        .filter(Objects::nonNull)                                                //Изящно простой способ убрать null
+        .collect(Collectors.joining(" "));                               //Склеиваем с разделителем " "
   }
 
   // словарь id персоны -> ее имя
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-    Map<Integer, String> map = new HashMap<>(1);
-    for (Person person : persons) {
-      if (!map.containsKey(person.id())) {
-        map.put(person.id(), convertPersonToString(person));
-      }
-    }
-    return map;
+    return persons.stream().collect(Collectors.toMap(
+        Person::id,
+        this::convertPersonToString //сократили в 1 StreamApi, разве это не прекрастно?)
+    ));
   }
 
   // есть ли совпадающие в двух коллекциях персоны?
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    boolean has = false;
-    for (Person person1 : persons1) {
-      for (Person person2 : persons2) {
-        if (person1.equals(person2)) {
-          has = true;
-        }
-      }
-    }
-    return has;
+    return persons1.stream().anyMatch(persons2::contains); //используем StreamAPI для нахождения совпадения
   }
 
   // Посчитать число четных чисел
   public long countEven(Stream<Integer> numbers) {
-    count = 0;
-    numbers.filter(num -> num % 2 == 0).forEach(num -> count++);
+    count = numbers.filter(num -> num % 2 == 0).count(); //используем StreamAPI для подсчёта
     return count;
   }
 
@@ -92,7 +65,9 @@ public class Task9 {
     List<Integer> integers = IntStream.rangeClosed(1, 10000).boxed().collect(Collectors.toList());
     List<Integer> snapshot = new ArrayList<>(integers);
     Collections.shuffle(integers);
-    Set<Integer> set = new HashSet<>(integers);
-    assert snapshot.toString().equals(set.toString());
+    Set<Integer> set = new HashSet<>(integers);       //т.к. у нас числа от  до 1000, хеши у этих чисел будут распологаться соответствующим образом
+    assert snapshot.toString().equals(set.toString());//у HashSet.toString() реализация происходит по его элементам, которые упорядочены по хешу
+                                                      //т.е. в порядчке от 1 до 1000.
+                                                      //чтд
   }
 }

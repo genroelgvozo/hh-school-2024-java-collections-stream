@@ -3,7 +3,6 @@ package tasks;
 import common.ApiPersonDto;
 import common.Person;
 import common.PersonConverter;
-import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -13,6 +12,7 @@ import java.util.List;
 Конвертер для одной персоны - personConverter.convert()
 FYI - DTO = Data Transfer Object - распространенный паттерн, можно погуглить
  */
+
 public class Task4 {
 
   private final PersonConverter personConverter;
@@ -21,7 +21,16 @@ public class Task4 {
     this.personConverter = personConverter;
   }
 
+  /**
+   * Задача 4
+   * Конвертация в ApiPersonDto
+   * @param persons персоны для конвертации
+   * @return конвертированные персоны
+   * @see ApiPersonDto
+   */
   public List<ApiPersonDto> convert(List<Person> persons) {
-    return new ArrayList<>();
+    return persons.stream()
+        .map(personConverter::convert)
+        .toList();
   }
 }
