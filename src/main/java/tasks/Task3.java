@@ -3,6 +3,7 @@ package tasks;
 import common.Person;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 /*
@@ -12,6 +13,11 @@ import java.util.List;
 public class Task3 {
 
   public static List<Person> sort(Collection<Person> persons) {
-    return new ArrayList<>(persons);
+    return persons.stream()
+            .sorted(Comparator.comparing(Person::secondName) // Сначала сортируем по фамилии
+                    .thenComparing(Person::firstName) // Затем по имени
+                    .thenComparing(Person::createdAt)) // И по дате создания
+            .toList(); // Преобразуем поток обратно в список
   }
 }
+
