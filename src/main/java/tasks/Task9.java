@@ -1,14 +1,8 @@
 package tasks;
 
 import common.Person;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -26,33 +20,33 @@ public class Task9 {
   // Костыль, эластик всегда выдает в топе "фальшивую персону".
   // Конвертируем начиная со второй
   public List<String> getNames(List<Person> persons) {
-    if (persons.size() == 0) {
+    // Проверка на пустоту
+    if (persons == null || persons.isEmpty()) {
       return Collections.emptyList();
     }
-    persons.remove(0);
-    return persons.stream().map(Person::firstName).collect(Collectors.toList());
+    // Используем Skip чтобы не изменять изначальную коллекцию
+    return persons.stream()
+            .skip(1) // Пропускаем первый элемент (фальшивую персону)
+            .map(Person::firstName)
+            .collect(Collectors.toList());
   }
 
   // Зачем-то нужны различные имена этих же персон (без учета фальшивой разумеется)
   public Set<String> getDifferentNames(List<Person> persons) {
-    return getNames(persons).stream().distinct().collect(Collectors.toSet());
+    // Напрямую конвертируем в Set
+    return new HashSet<>(getNames(persons));
   }
 
   // Тут фронтовая логика, делаем за них работу - склеиваем ФИО
   public String convertPersonToString(Person person) {
-    String result = "";
-    if (person.secondName() != null) {
-      result += person.secondName();
+    if (person == null) {
+      return "";
     }
-
-    if (person.firstName() != null) {
-      result += " " + person.firstName();
-    }
-
-    if (person.secondName() != null) {
-      result += " " + person.secondName();
-    }
-    return result;
+    // Используем String.join для склейки строк, для улучшения читаемости
+    return String.join(" ",
+            Optional.ofNullable(person.secondName()).orElse(""),
+            Optional.ofNullable(person.firstName()).orElse(""),
+            Optional.ofNullable(person.middleName()).orElse("")).trim();
   }
 
   // словарь id персоны -> ее имя
@@ -68,22 +62,19 @@ public class Task9 {
 
   // есть ли совпадающие в двух коллекциях персоны?
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    boolean has = false;
-    for (Person person1 : persons1) {
-      for (Person person2 : persons2) {
-        if (person1.equals(person2)) {
-          has = true;
-        }
-      }
+    if (persons1 == null || persons2 == null) {
+      return false;
     }
-    return has;
+
+    // Преобразуем одну из коллекций в множество для ускорения проверки
+    Set<Person> personSet = new HashSet<>(persons1);
+    return persons2.stream().anyMatch(personSet::contains);
   }
 
   // Посчитать число четных чисел
+  //убрана лишняя переменная
   public long countEven(Stream<Integer> numbers) {
-    count = 0;
-    numbers.filter(num -> num % 2 == 0).forEach(num -> count++);
-    return count;
+    return numbers.filter(num -> num % 2 == 0).count();
   }
 
   // Загадка - объясните почему assert тут всегда верен
@@ -93,6 +84,8 @@ public class Task9 {
     List<Integer> snapshot = new ArrayList<>(integers);
     Collections.shuffle(integers);
     Set<Integer> set = new HashSet<>(integers);
-    assert snapshot.toString().equals(set.toString());
+    // Утверждение всегда истинно, так как snapshot.toString() создаёт строку с числами в порядке их добавления,
+    // а toString() для HashSet у Integer возвращает числа в их натуральном порядке.
+    assert new TreeSet<>(snapshot).toString().equals(new TreeSet<>(set).toString());
   }
 }
