@@ -1,11 +1,9 @@
 package tasks;
 
-import common.Person;
-import common.PersonService;
-import common.PersonWithResumes;
-import common.Resume;
-import java.util.Collection;
-import java.util.Set;
+import common.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /*
   Еще один вариант задачи обогащения
@@ -21,7 +19,25 @@ public class Task8 {
   }
 
   public Set<PersonWithResumes> enrichPersonsWithResumes(Collection<Person> persons) {
-    Set<Resume> resumes = personService.findResumes(Set.of());
-    return Set.of();
+    // Сбор всех ID персон
+    Set<Integer> personIds = persons.stream()
+            .map(Person::id)
+            .collect(Collectors.toSet());
+
+    // Получаем все резюме одним вызовом
+    Map<Integer, Set<Resume>> resumesByPersonId = personService.findResumes(personIds)
+            .stream()
+            .collect(Collectors.groupingBy(
+                    Resume::personId,
+                    Collectors.toSet()
+            ));
+
+    // Формируем результат
+    return persons.stream()
+            .map(person -> new PersonWithResumes(
+                    person,
+                    resumesByPersonId.getOrDefault(person.id(), Set.of())
+            ))
+            .collect(Collectors.toSet());
   }
 }
