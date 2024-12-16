@@ -23,6 +23,14 @@ public class Task5 {
   }
 
   public List<ApiPersonDto> convert(List<Person> persons, Map<Integer, Integer> personAreaIds) {
-    return new ArrayList<>();
+    List<ApiPersonDto> personDto = new ArrayList<>();
+    for (Person person : persons) {
+      personDto.add(personConverter.convert(person));
+    }
+    for (ApiPersonDto person : personDto) {
+      person.setAreaId(personAreaIds.get(Integer.parseInt(person.getId())));
+    }
+
+    return personDto;
   }
 }
