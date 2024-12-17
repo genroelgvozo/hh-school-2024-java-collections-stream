@@ -2,9 +2,9 @@ package tasks;
 
 import common.Person;
 import common.PersonService;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /*
 Задача 1
@@ -13,6 +13,10 @@ import java.util.Set;
 нужно их отсортировать в том же порядке, что и переданные id.
 Оценить асимптотику работы
  */
+
+//Преобразование множества в словарь - О(m),
+// плюс еще цикл(О(n)) => O(m + n) итоговая асимтотика
+
 public class Task1 {
 
   private final PersonService personService;
@@ -23,6 +27,13 @@ public class Task1 {
 
   public List<Person> findOrderedPersons(List<Integer> personIds) {
     Set<Person> persons = personService.findPersons(personIds);
-    return Collections.emptyList();
+
+    Map<Integer, Person> idPersonMap = persons.stream()
+            .collect(Collectors.toMap(Person::id, person -> person));
+
+    return personIds.stream()
+        .map(idPersonMap::get)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
   }
 }

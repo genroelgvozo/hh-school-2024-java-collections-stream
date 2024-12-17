@@ -21,8 +21,15 @@ public class Task5 {
   public Task5(PersonConverter personConverter) {
     this.personConverter = personConverter;
   }
-
   public List<ApiPersonDto> convert(List<Person> persons, Map<Integer, Integer> personAreaIds) {
-    return new ArrayList<>();
+    List<ApiPersonDto> apiPersonDtos = new ArrayList<>();
+    
+    for (Person person : persons) {
+      Integer areaId = personAreaIds.get(person.id());
+      ApiPersonDto apiPersonDto = personConverter.convert(person, areaId);
+      apiPersonDtos.add(apiPersonDto);
+    }
+
+    return apiPersonDtos;
   }
 }

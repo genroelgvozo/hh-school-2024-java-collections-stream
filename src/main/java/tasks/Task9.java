@@ -1,14 +1,8 @@
 package tasks;
 
 import common.Person;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -26,64 +20,65 @@ public class Task9 {
   // Костыль, эластик всегда выдает в топе "фальшивую персону".
   // Конвертируем начиная со второй
   public List<String> getNames(List<Person> persons) {
-    if (persons.size() == 0) {
-      return Collections.emptyList();
+    if (persons.isEmpty()) {     //  тут поправку на спец метод проверки на пустоту даже сама идея предлагает. на мой взгляд проще прочитать слова чем думать почему тут равно-равно стоит
+      return Collections.emptyList(); // Подумав еще раз, вроде смысла нет в проверке. так как скип вернет пустой список. мапа от пустого списка тоже пуста => после то лист будет [] буквально то же что и в if
     }
-    persons.remove(0);
-    return persons.stream().map(Person::firstName).collect(Collectors.toList());
+    // persons.remove(0); это можно просто в стрим сразу включить написав skip
+    return persons.stream().skip(1) // лучше skip потому что при удалении возникает много лишней работы с памятью. так как лист то будет пересчет заголовка как минимум. да и в целом может когда-нибудь понадобятся эти фальшивки, мало ли
+        .map(Person::firstName)          // ну и в целом легче читать если главные пункты
+        .collect(Collectors.toList());   // на разных строчкках, но наверно это не очень важно
+
   }
 
   // Зачем-то нужны различные имена этих же персон (без учета фальшивой разумеется)
+  /*
+  тут идея сама пишет, что distinct не нужен:
+  Redundant 'distinct()' call: elements will be distinct anyway when collected to a Set
+  что логично, действительно, зачем еще дистинкт когда мы все равно потом все запишем в множество
+  а без него все в целом упрощается до конструктора нового сета просто
+ */
+
   public Set<String> getDifferentNames(List<Person> persons) {
-    return getNames(persons).stream().distinct().collect(Collectors.toSet());
+    return new HashSet<>(getNames(persons));
   }
 
   // Тут фронтовая логика, делаем за них работу - склеиваем ФИО
-  public String convertPersonToString(Person person) {
-    String result = "";
-    if (person.secondName() != null) {
-      result += person.secondName();
-    }
-
-    if (person.firstName() != null) {
-      result += " " + person.firstName();
-    }
-
-    if (person.secondName() != null) {
-      result += " " + person.secondName();
-    }
-    return result;
+  /* поменяла реализацию в соотвествии с пояснениями
+   */
+  public String BuildFullNameForPerson(Person person) {
+    return Stream.of(person.secondName(), person.firstName(), person.middleName())
+        .filter(Objects::nonNull)
+        .collect(Collectors.joining(" "));
   }
 
   // словарь id персоны -> ее имя
+  // перепишем через стрим для большей наглядности
+  // заменила distinct на то как было на лекции
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-    Map<Integer, String> map = new HashMap<>(1);
-    for (Person person : persons) {
-      if (!map.containsKey(person.id())) {
-        map.put(person.id(), convertPersonToString(person));
-      }
-    }
-    return map;
+    return persons.stream()
+        .collect(Collectors.toMap(
+            Person::id,
+            this::BuildFullNameForPerson,
+            (existing, duplicate) -> existing));
   }
 
   // есть ли совпадающие в двух коллекциях персоны?
+  //через стрим быстрее и нагляднее
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    boolean has = false;
-    for (Person person1 : persons1) {
-      for (Person person2 : persons2) {
-        if (person1.equals(person2)) {
-          has = true;
-        }
-      }
-    }
-    return has;
+    Set<Person> setForPerson2 = new HashSet<>(persons2);
+    return persons1.stream().anyMatch(setForPerson2::contains);
   }
 
   // Посчитать число четных чисел
+  // в целом не вижу смысла в доп переменной count, можно сразу
+  /*
+    при использовании доп переменной есть несколько проблем:
+    во-первых возможна ситуации что далее использует в своей части кода что может привести к ошибкам
+    во-вторых с ней в целом снижается читабельность, поскольку для понимания этой части кода нужно посмотреть большее кол-во строчек
+    ну и зачем доп переменная если есть спец метод но про это я написала уже (хотя наверно не очень ясно это сделала)
+   */
   public long countEven(Stream<Integer> numbers) {
-    count = 0;
-    numbers.filter(num -> num % 2 == 0).forEach(num -> count++);
-    return count;
+    return numbers.filter(num -> num % 2 == 0).count();
   }
 
   // Загадка - объясните почему assert тут всегда верен
@@ -95,4 +90,15 @@ public class Task9 {
     Set<Integer> set = new HashSet<>(integers);
     assert snapshot.toString().equals(set.toString());
   }
+
+  /*
+   Хеш функция от целого числа это просто это же число. Хеш таблица определяет куда попадет очередной элемент (в какой конкретно бакет)
+   через формулу: bucketIndex = (hashcode) % (capacity - 1) , где вместимость хеш таблицы определяется из того, что она расширяется вдвое при достижениее значения
+   capacity * loadFactor. причем обычно loadfactor ~0.75
+   У нас 10000 элементов => 10000/0.75 = 13333.33... то есть ближайшая степень двойки 16384 т е сильно больше 10000 => каждое число будет в отдельном бакете.
+   причем попадут они туда в порядке возрастания, потому что остаток от деления всех чисел при делении на 16384 и будут эти числа
+   toString() печатает элементы в том порядке что они приходят к нему от HashSet, а он в свою очередь проходится по бакетам просто в порядке возрастания.
+   Т е получается отсортированный вывод.
+  */
+
 }
