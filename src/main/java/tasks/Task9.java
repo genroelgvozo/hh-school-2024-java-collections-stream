@@ -1,13 +1,8 @@
 package tasks;
 
 import common.Person;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -26,7 +21,7 @@ public class Task9 {
   // Конвертируем начиная со второй
   public List<String> getNames(List<Person> persons) {
     if (persons.isEmpty()) {     //  тут поправку на спец метод проверки на пустоту даже сама идея предлагает. на мой взгляд проще прочитать слова чем думать почему тут равно-равно стоит
-      return Collections.emptyList(); // думаю, проверка тут нужна. так как если список пусто то скип вернет пустой список и продолжит работать не оповестив нас о пустоте списка что может в последствии вызвать проблемы
+      return Collections.emptyList(); // Подумав еще раз, вроде смысла нет в проверке. так как скип вернет пустой список. мапа от пустого списка тоже пуста => после то лист будет [] буквально то же что и в if
     }
     // persons.remove(0); это можно просто в стрим сразу включить написав skip
     return persons.stream().skip(1) // лучше skip потому что при удалении возникает много лишней работы с памятью. так как лист то будет пересчет заголовка как минимум. да и в целом может когда-нибудь понадобятся эти фальшивки, мало ли
@@ -52,9 +47,8 @@ public class Task9 {
    */
   public String BuildFullNameForPerson(Person person) {
     return Stream.of(person.secondName(), person.firstName(), person.middleName())
-        .filter(name -> name != null && !name.trim().isEmpty())
-        .reduce((name1, name2) -> name1 + " " + name2)
-        .orElse("");
+        .filter(Objects::nonNull)
+        .collect(Collectors.joining(" "));
   }
 
   // словарь id персоны -> ее имя
